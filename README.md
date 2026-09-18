@@ -25,6 +25,7 @@
 - [Project Structure](#project-structure)
 - [Verification](#verification)
 - [Backup and Recovery](#backup-and-recovery)
+- [Command Reference](#command-reference)
 - [Limitations](#limitations)
 
 ---
@@ -114,16 +115,32 @@ flowchart TB
 
 ## Prerequisites
 
-- An existing Kubernetes multi-node playground with `kubectl` access.
+> V1 was built and verified against a **time-limited Kubernetes lab environment**, so examples below use its terminology (View Port, session expiry). The scripts and Helm chart target any Kubernetes cluster — pick the path below matching where you're running this.
+
+Common to every path:
 - Helm, Bash, Git, curl, Python 3.10+, and Python venv support.
-- A working StorageClass or the [local-PV setup](docs/storage.md).
 - Two 5Gi volumes and at least **850m CPU / 1344Mi memory** available for workload requests, plus Kubernetes system capacity.
 - An approved OpenAI-compatible HTTPS endpoint, API key, and chat model ID.
-- The active session's expiry time and HTTPS browser access URL.
+- `kubectl` pointed at the target cluster (`kubectl config current-context`).
+
+**Local (minikube / kind / Docker Desktop Kubernetes):**
+- Cluster running with a default StorageClass already present (minikube/kind ship one — confirm with `kubectl get storageclass`).
+- Browser access via `kubectl port-forward` or `minikube service` — no View Port/ingress needed.
+- No session expiry; skip `SESSION_EXPIRES_AT`.
+
+**Cloud (EKS / GKE / AKS, your own account):**
+- Cluster provisioned and `kubectl` context pointed at it; a cloud StorageClass exists by default (e.g. `gp2`/`gp3` on EKS).
+- Browser access via a `LoadBalancer` Service or an ingress controller + your own domain/TLS — not View Port.
+- No session expiry; skip `SESSION_EXPIRES_AT`. Real cloud cost applies — size resources accordingly.
+
+**Time-limited lab playground (what V1 was verified against):**
+- A working StorageClass or the [local-PV setup](docs/storage.md) if none exists.
+- Access via the lab's View Port / NodePort exposure — see [Browser Access](#browser-access).
+- The active session's expiry time and HTTPS browser access URL — note both before deploying.
 
 ## How to Deploy
 
-Run these steps in the **playground terminal**. Use a checkout or transferred copy containing the V1 files; unpublished local changes are not available through `git clone`.
+All three paths share the same clone + venv setup, then diverge at the environment variables and browser access step. Use a checkout or transferred copy containing the V1 files; unpublished local changes are not available through `git clone`.
 
 ```bash
 git clone https://github.com/ThinkWithOps/thinkwithops-openwebui-production.git
@@ -136,7 +153,55 @@ python3 -m pip install -r scripts/requirements-validation.txt
 
 kubectl config current-context
 kubectl get storageclass
+```
 
+### Path A — Local (minikube / kind / Docker Desktop)
+
+```bash
+export EXPECTED_CONTEXT='REPLACE_WITH_YOUR_LOCAL_CONTEXT'
+export PLAYGROUND_ACCESS_METHOD='kubectl port-forward on 8080'
+export STORAGE_CLASS='standard'   # or whatever `kubectl get storageclass` shows as default
+unset SESSION_EXPIRES_AT
+
+bash scripts/preflight.sh
+python3 scripts/configure-playground.py
+export PREFLIGHT_REVIEWED=yes
+bash scripts/deploy.sh
+```
+
+Browser access:
+
+```bash
+kubectl get svc -n <namespace>
+kubectl port-forward -n <namespace> svc/<open-webui-service> 8080:80
+# open http://localhost:8080
+```
+
+### Path B — Cloud (EKS / GKE / AKS, your own account)
+
+```bash
+export EXPECTED_CONTEXT='REPLACE_WITH_YOUR_CLOUD_CONTEXT'
+export PLAYGROUND_ACCESS_METHOD='LoadBalancer Service'   # or 'Ingress' if you have a controller + domain
+export STORAGE_CLASS='REPLACE_WITH_CLOUD_STORAGE_CLASS'  # e.g. gp3 on EKS, standard-rwo on GKE
+unset SESSION_EXPIRES_AT
+
+bash scripts/preflight.sh
+python3 scripts/configure-playground.py
+export PREFLIGHT_REVIEWED=yes
+bash scripts/deploy.sh
+```
+
+Browser access:
+
+```bash
+kubectl get svc -n <namespace>
+# LoadBalancer: use the EXTERNAL-IP/hostname shown
+# Ingress: use your own domain + TLS, see docs/deployment.md#existing-ingress--tls
+```
+
+### Path C — Time-limited lab playground (what V1 was verified against)
+
+```bash
 # Replace with the inspected session details.
 export EXPECTED_CONTEXT='REPLACE_WITH_PLAYGROUND_CONTEXT'
 export SESSION_EXPIRES_AT='REPLACE_WITH_ACTUAL_EXPIRY_AND_TIMEZONE'
@@ -146,7 +211,7 @@ export STORAGE_CLASS='REPLACE_WITH_VERIFIED_CLASS'
 bash scripts/preflight.sh
 ```
 
-Review preflight results and resolve blocked checks. Obtain the HTTPS View Port URL, then configure the application:
+Review preflight results and resolve blocked checks. If no StorageClass exists, complete [storage setup](docs/storage.md) first, then rerun preflight. Obtain the HTTPS View Port URL, then configure the application:
 
 ```bash
 python3 scripts/configure-playground.py
@@ -154,15 +219,19 @@ export PREFLIGHT_REVIEWED=yes
 bash scripts/deploy.sh
 ```
 
-The configuration script prompts for the endpoint, model, storage, browser URL, admin credentials, and API key. Credentials stay in Kubernetes Secrets and ignored private files. Keep `WEBUI_SECRET_KEY` stable across restarts and restores.
+Browser access: **Playground View Port → 30080**. Set `WEBUI_URL` to the exact HTTPS URL generated by the active session. If View Port runs on a separate entry node, use the [forwarding instructions](docs/deployment.md).
+
+---
+
+All paths: the configuration script prompts for the endpoint, model, storage, browser URL, admin credentials, and API key. Credentials stay in Kubernetes Secrets and ignored private files. Keep `WEBUI_SECRET_KEY` stable across restarts and restores.
 
 See the [deployment guide](docs/deployment.md) for Helm installation, credential handling, and ingress configuration.
 
 ## Browser Access
 
-Default access: **Playground View Port → 30080**. Set `WEBUI_URL` to the exact HTTPS URL generated by the active session.
-
-If View Port runs on a separate entry node, use the [forwarding instructions](docs/deployment.md). An existing ingress controller can instead use the [TLS ingress profile](docs/deployment.md#existing-ingress--tls).
+- **Local:** `kubectl port-forward`, then open `http://localhost:<port>`.
+- **Cloud:** `LoadBalancer` Service EXTERNAL-IP, or your own ingress + domain + TLS — see the [TLS ingress profile](docs/deployment.md#existing-ingress--tls).
+- **Lab playground:** View Port → 30080, HTTPS URL generated per session — see the [forwarding instructions](docs/deployment.md) if View Port runs on a separate entry node.
 
 ## Project Structure
 
@@ -210,6 +279,106 @@ See [V1 evidence](docs/evidence/v1/README.md) and [actual static output](docs/ev
 Use the [recovery runbook](docs/recovery.md) to create an encrypted backup and restore into a fresh session.
 
 **Pod-restart persistence and session-expiry survival are different.** Download backups outside the playground before expiry. Git contains configuration; it does not contain users, chats, uploads, or credentials.
+
+## Command Reference
+
+### V1 preflight (run first, every new playground session)
+
+```bash
+kubectl config current-context
+kubectl get nodes
+kubectl get storageclass
+kubectl auth can-i create deployment --all-namespaces
+kubectl auth can-i create pvc --all-namespaces
+kubectl auth can-i create secret --all-namespaces
+kubectl auth can-i create configmap --all-namespaces
+kubectl auth can-i create ingress --all-namespaces
+kubectl auth can-i create persistentvolumes
+kubectl auth can-i create storageclasses.storage.k8s.io
+kubectl get ingressclass
+kubectl get pods -A
+kubectl describe nodes | grep -A5 "Allocated resources"
+helm version --short
+python3 --version
+df -h /var/local
+```
+
+### Clone and environment setup
+
+```bash
+git clone https://github.com/ThinkWithOps/thinkwithops-openwebui-production.git
+cd thinkwithops-openwebui-production
+
+mkdir -p _local
+python3 -m venv _local/venv
+source _local/venv/bin/activate
+python3 -m pip install -r scripts/requirements-validation.txt
+```
+
+### Configure and deploy
+
+Pick the block matching your environment (see [How to Deploy](#how-to-deploy) for full context):
+
+```bash
+# Local (minikube / kind / Docker Desktop)
+export EXPECTED_CONTEXT='REPLACE_WITH_YOUR_LOCAL_CONTEXT'
+export PLAYGROUND_ACCESS_METHOD='kubectl port-forward on 8080'
+export STORAGE_CLASS='standard'
+unset SESSION_EXPIRES_AT
+
+# Cloud (EKS / GKE / AKS)
+export EXPECTED_CONTEXT='REPLACE_WITH_YOUR_CLOUD_CONTEXT'
+export PLAYGROUND_ACCESS_METHOD='LoadBalancer Service'
+export STORAGE_CLASS='REPLACE_WITH_CLOUD_STORAGE_CLASS'
+unset SESSION_EXPIRES_AT
+
+# Time-limited lab playground
+export EXPECTED_CONTEXT='REPLACE_WITH_PLAYGROUND_CONTEXT'
+export SESSION_EXPIRES_AT='REPLACE_WITH_ACTUAL_EXPIRY_AND_TIMEZONE'
+export PLAYGROUND_ACCESS_METHOD='Playground View Port on 30080'
+export STORAGE_CLASS='REPLACE_WITH_VERIFIED_CLASS'
+
+# Then, for any environment:
+bash scripts/preflight.sh
+python3 scripts/configure-playground.py
+export PREFLIGHT_REVIEWED=yes
+bash scripts/deploy.sh
+```
+
+### Browser access commands per environment
+
+```bash
+# Local
+kubectl port-forward -n <namespace> svc/<open-webui-service> 8080:80
+
+# Cloud (LoadBalancer)
+kubectl get svc -n <namespace>   # use EXTERNAL-IP/hostname shown
+
+# Lab playground
+# Select View Port -> 30080 in the platform UI, use the generated HTTPS URL
+```
+
+### Verify
+
+```bash
+bash scripts/verify.sh
+bash scripts/export-artifacts.sh
+```
+
+### Restart-persistence check (Open WebUI pod only)
+
+```bash
+kubectl get pods -n <namespace>
+kubectl delete pod -n <namespace> -l app.kubernetes.io/name=open-webui
+kubectl get pods -n <namespace> -w
+```
+
+### Backup and restore
+
+```bash
+bash scripts/backup.sh
+bash scripts/restore.sh
+```
 
 ## Limitations
 

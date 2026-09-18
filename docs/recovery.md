@@ -20,7 +20,7 @@ Backup briefly scales **only Open WebUI** to zero to stop application writes. A 
 
 The exit handler deletes the temporary pod and attempts to return the application to one replica even on failure. On failure, private partial data remains under ignored `_local/backup.*` for diagnosis; it must not be shared or committed. On success only the encrypted archive remains. Private temporary files are mode 0600/0700, but encryption at rest for the playground itself is not claimed.
 
-4. **Download the encrypted archive and sanitized evidence to storage outside KodeKloud before expiry.** Use the active playground's supported download/transfer method. Do not assume Git stores these ignored files.
+4. **Download the encrypted archive and sanitized evidence to storage outside the lab environment before expiry.** Use the active playground's supported download/transfer method. Do not assume Git stores these ignored files.
 5. Verify the downloaded file's hash matches the original (`sha256sum <archive>`) and confirm decryption with the saved age identity on the trusted machine. Do not expose the plaintext archive in public storage.
 
 Keep the original signing key and DB credentials. Losing WEBUI_SECRET_KEY invalidates sessions and may make encrypted application credentials unusable. TLS private keys are not included: provision the new session's TLS Secret separately if using ingress.
