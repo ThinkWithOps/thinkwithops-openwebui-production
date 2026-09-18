@@ -25,16 +25,23 @@ The application image runs with its upstream user defaults; PostgreSQL runs as U
 kubectl auth can-i create persistentvolumes
 kubectl auth can-i create storageclasses.storage.k8s.io
 cp helm-chart/local-pv.example.yaml _local/local-pv.yaml
-# Edit both REPLACE_WORKER values to the selected kubernetes.io/hostname label.
-# Inspect existing project-named resources; never overwrite unrelated resources.
+sed -i 's/REPLACE_WORKER/YOUR_CHOSEN_NODE/g' _local/local-pv.yaml
+grep -i REPLACE_WORKER _local/local-pv.yaml   # must print nothing before continuing
 kubectl get storageclass thinkwithops-local --ignore-not-found
 kubectl get pv thinkwithops-openwebui-data thinkwithops-openwebui-postgresql --ignore-not-found
 kubectl create -f _local/local-pv.yaml
+kubectl get pv   # both must show Available, not Pending, before proceeding
 export STORAGE_CLASS=thinkwithops-local
 bash scripts/preflight.sh
 ```
 
 Use `create` only once in a new session. If objects already exist, inspect/reuse them; do not delete or replace them blindly. Claim references are fixed to namespace `thinkwithops-openwebui` and PVCs `openwebui` and `openwebui-postgresql`. Node affinity keeps each consumer on the correct worker. WaitForFirstConsumer can leave claims Pending until the workloads are scheduled.
+
+**`nodeAffinity` is immutable once a PV is created.** If you run `kubectl create` before replacing `REPLACE_WORKER` (or with the wrong node name), the pod will stay `Pending` forever with `didn't match PersistentVolume's node affinity` in its events — patching the live PV won't work. Fix: delete both the PVCs and the PVs, fix `_local/local-pv.yaml`, then `kubectl create -f` again:
+```bash
+kubectl -n thinkwithops-openwebui delete pvc openwebui openwebui-postgresql
+kubectl delete pv thinkwithops-openwebui-data thinkwithops-openwebui-postgresql
+```
 
 PV retain policy and Helm keep annotations help avoid accidental data loss but are not a backup. A Released PV needs deliberate recovery; do not wipe claimRef or delete directories as routine troubleshooting.
 

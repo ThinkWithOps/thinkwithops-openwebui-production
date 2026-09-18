@@ -23,6 +23,8 @@ The exit handler deletes the temporary pod and attempts to return the applicatio
 4. **Download the encrypted archive and sanitized evidence to storage outside the lab environment before expiry.** Use the active playground's supported download/transfer method. Do not assume Git stores these ignored files.
 5. Verify the downloaded file's hash matches the original (`sha256sum <archive>`) and confirm decryption with the saved age identity on the trusted machine. Do not expose the plaintext archive in public storage.
 
+If large-file download requires splitting, split only the already-encrypted `.tar.age` file. Serve chunks temporarily over a private View Port; never put the age private key, `secrets.json`, plaintext tar, database dump, or app-data archive in that directory. Stop the temporary HTTP server immediately after transfer. Reassemble in order, verify SHA-256 against the playground original, then decrypt on the trusted machine.
+
 Keep the original signing key and DB credentials. Losing WEBUI_SECRET_KEY invalidates sessions and may make encrypted application credentials unusable. TLS private keys are not included: provision the new session's TLS Secret separately if using ingress.
 
 ## Fresh-session restore

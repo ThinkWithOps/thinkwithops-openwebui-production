@@ -7,13 +7,14 @@
 | Official chart/app pairing and upstream templates inspected | PASS |
 | Helm 3.19.0 lint/render/configuration guards, both access profiles | PASS ? static-validation.txt |
 | Bash/Python syntax and 8 configuration/export guard tests | PASS ? static-validation.txt |
-| Cluster capacity/storage/permissions/session access | BLOCKED — no playground session accessible |
-| Workload/DB/Redis readiness | NOT RUN |
-| Provider/model selection | BLOCKED — approved provider/model not supplied |
-| Actual API chat and saved history | NOT RUN |
-| Browser HTTPS/WebSockets/streaming | NOT RUN |
-| App-only pod restart persistence | NOT RUN |
-| Encrypted backup/fresh-session restore | NOT RUN |
+| Cluster capacity/storage/permissions/session access | PASS — live run; local-PV fallback used |
+| Workload/DB/Redis readiness | PASS — live run |
+| Provider/model selection | PASS — Groq OpenAI-compatible endpoint; `openai/gpt-oss-20b` |
+| Actual API chat and saved history | PASS — live run |
+| Browser HTTPS/WebSockets/streaming | PASS — live run |
+| App-only pod restart persistence | PASS — live run; DB/Redis pod UIDs unchanged |
+| Encrypted backup | PASS — live run |
+| Fresh-session restore | PASS — live run |
 | GitHub Actions execution | NOT RUN — workflow created only |
 | Runner-to-cluster deployment | NOT VERIFIED / NOT ENABLED |
 

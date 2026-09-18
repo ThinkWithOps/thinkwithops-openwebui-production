@@ -3,11 +3,14 @@
 > A Kubernetes DevOps layer (Helm, PostgreSQL, Redis, GitHub Actions CI validation) built on top of Open WebUI, a self-hosted LLM chat interface.
 
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-v0.11.3-111827?style=flat)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-Playground-326CE5?style=flat&logo=kubernetes&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-1.26+-326CE5?style=flat&logo=kubernetes&logoColor=white)
 ![Helm](https://img.shields.io/badge/Helm-3.19.0-0F1689?style=flat&logo=helm&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17.11-4169E1?style=flat&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7.4.11-DC382D?style=flat&logo=redis&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI_Validation-2088FF?style=flat&logo=githubactions&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-OpenAI--compatible_API-F55036?style=flat)
+![License](https://img.shields.io/badge/App_License-Open_WebUI_License-green?style=flat)
 
 ---
 
@@ -42,7 +45,7 @@ Everything under `helm-chart/`, `scripts/`, `docs/`, and `.github/workflows/depl
 
 | Part | Tag | Focus | Status |
 |---|---|---|---|
-| V1 | `v1.0-openwebui-k8s-deployment` *(proposed)* | Kubernetes deployment, model connection, chat and persistence verification | Implementation complete; live verification pending |
+| V1 | `v1.0-openwebui-k8s-deployment` *(proposed)* | Kubernetes deployment, model connection, chat and persistence verification | Fully verified live; tag remains pending approval |
 
 ## Attribution
 
@@ -65,7 +68,7 @@ V1 includes:
 - Preflight, deployment, chat verification, evidence export, and encrypted backup/restore scripts.
 - GitHub Actions for Helm linting, rendering, and configuration checks.
 
-**Current status:** static checks pass. Deployment, real model chat, browser access, and persistence still require verification in the playground.
+**Current status:** fully verified live in the playground — deployment, Groq-backed chat, browser access, streaming/WebSocket behavior, uploads, restart persistence, encrypted backup, and fresh-session restore confirmed during the live run.
 
 ## Architecture
 
@@ -266,10 +269,11 @@ The scripts check database/Redis connectivity, sign-in, a real model response, s
 |---|---|
 | Helm lint/render, both access profiles | Passed |
 | Configuration guards, syntax, 8 guard tests | Passed |
-| Playground deployment and backend readiness | Pending |
-| Real model chat and browser access | Pending |
-| App-only restart persistence | Pending |
-| Fresh-session restore | Pending |
+| Playground deployment and backend readiness | Passed — live run |
+| Real model chat | Passed — Groq `openai/gpt-oss-20b` |
+| Browser HTTPS, streaming, WebSockets and upload | Passed — live run |
+| App-only restart persistence | Passed |
+| Encrypted backup and fresh-session restore | Passed — live run |
 | Automated deployment from GitHub Actions | Not enabled; connectivity and credentials unverified |
 
 See [V1 evidence](docs/evidence/v1/README.md) and [actual static output](docs/evidence/v1/static-validation.txt).

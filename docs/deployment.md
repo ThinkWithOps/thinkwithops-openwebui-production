@@ -10,9 +10,16 @@ These commands run **in the playground terminal**, not on a local Kubernetes clu
 git clone https://github.com/ThinkWithOps/thinkwithops-openwebui-production.git
 cd thinkwithops-openwebui-production
 mkdir -p _local
+sudo apt update
+sudo apt install python3-venv python3.10-venv -y
 python3 -m venv _local/venv
 source _local/venv/bin/activate
 python3 -m pip install -r scripts/requirements-validation.txt
+
+# If python3.10-venv has no install candidate even after `apt update`, skip venv:
+#   sudo apt install python3-pip -y
+#   python3 -m pip install -r scripts/requirements-validation.txt
+# Then run every `python3 scripts/*.py` command directly, no `activate` needed.
 
 # If Helm is missing, install the same pinned version used in CI.
 curl -fsSL https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz -o _local/helm.tar.gz
@@ -33,6 +40,10 @@ cat _local/preflight.txt
 ```
 
 Preflight must exit zero. Review node allocations, quotas, available disk, controller state, and time remaining. If no storage class exists, complete [storage setup](storage.md), then rerun preflight. The scripts do not install an ingress controller, storage operator or cloud resources.
+
+**Exported env vars (`EXPECTED_CONTEXT`, `SESSION_EXPIRES_AT`, `PLAYGROUND_ACCESS_METHOD`, `STORAGE_CLASS`, `PREFLIGHT_REVIEWED`) do not persist across a new terminal tab or SSH session.** Re-export all of them every time you open a fresh shell, before running any script — otherwise `preflight.sh`/`deploy.sh`/`verify.sh` fail immediately with `Set EXPECTED_CONTEXT to the inspected playground context`.
+
+**Verify your model ID actually exists on the configured endpoint before deploying.** A wrong model ID (e.g. copying an example from documentation instead of a real one from your provider) passes preflight but fails `scripts/verify.sh` with `FAIL: chat/persistence verification (RuntimeError)` after sign-in succeeds — the failure message is deliberately generic to avoid leaking response content. Confirm the model list directly against your provider's OpenAI-compatible `/v1/models` endpoint (or Open WebUI's own `/api/models` once deployed) before picking an ID for `configure-playground.py`.
 
 For ARM nodes, obtain the matching Helm CLI archive; container runtime architecture/pull access remains part of live checks.
 
