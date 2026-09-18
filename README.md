@@ -1,6 +1,6 @@
 # Open WebUI — Kubernetes Deployment
 
-> A ThinkWithOps DevOps project deploying Open WebUI with PostgreSQL, Redis, and persistent storage on the Kubernetes multi-node playground.
+> A Kubernetes DevOps layer (Helm, PostgreSQL, Redis, GitHub Actions CI validation) built on top of Open WebUI, a self-hosted LLM chat interface.
 
 ![Open WebUI](https://img.shields.io/badge/Open_WebUI-v0.11.3-111827?style=flat)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-Playground-326CE5?style=flat&logo=kubernetes&logoColor=white)
@@ -31,11 +31,11 @@
 
 ## Project Description
 
-This repository adds a Kubernetes deployment layer to [Open WebUI](https://github.com/open-webui/open-webui), a web interface for interacting with language models.
+This repo takes [Open WebUI](https://github.com/open-webui/open-webui) — a full-featured, self-hosted web interface for LLMs (Python/FastAPI backend, Svelte frontend, supports Ollama and any OpenAI-compatible API) — and adds a Kubernetes deployment layer around it, without touching a single line of application code.
 
 The project runs on an existing **Kubernetes multi-node** playground. A pinned official Helm chart deploys Open WebUI; PostgreSQL stores users and chat history, Redis supports WebSocket communication, and persistent volumes hold database files and uploads.
 
-Application source remains unchanged. Project additions cover Helm configuration, deployment scripts, CI validation, verification, and recovery.
+Everything under `helm-chart/`, `scripts/`, `docs/`, and `.github/workflows/deploy.yml` is new, purpose-built deployment tooling. Application source is untouched.
 
 ## Video Series
 
