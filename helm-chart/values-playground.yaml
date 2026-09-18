@@ -1,0 +1,8 @@
+# Apply after values.yaml. Session-specific choices go in ignored values-session.yaml.
+open-webui:
+  replicaCount: 1
+  service:
+    type: NodePort
+    nodePort: 30080
+  ingress:
+    enabled: false

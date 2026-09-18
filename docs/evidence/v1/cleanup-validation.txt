@@ -1,0 +1,17 @@
+Repository cleanup validation
+
+Removed 23 upstream administration, CI/publishing, promotional, and duplicate documentation files.
+Updated README links and replaced upstream-publisher guard with validation-only CI guard.
+
+python -m unittest discover -s scripts/tests -p 'test_*.py'
+........
+Ran 8 tests in 9.502s
+OK
+
+PASS: README local links
+PASS: prohibited README term absent
+PASS: upstream application source and build dependencies unchanged
+PASS: LICENSE, LICENSE_NOTICE, LICENSE_HISTORY, CONTRIBUTOR_LICENSE_AGREEMENT retained
+PASS: git diff --check
+
+No live cluster checks performed. No commit or push.

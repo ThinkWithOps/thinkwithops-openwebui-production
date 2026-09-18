@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openwebui-config
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  {{- toYaml .Values.appConfig | nindent 2 }}

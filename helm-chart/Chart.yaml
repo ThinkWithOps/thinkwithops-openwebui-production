@@ -1,0 +1,11 @@
+apiVersion: v2
+name: thinkwithops-openwebui
+description: Single-replica Open WebUI lab deployment for an existing KodeKloud cluster
+type: application
+version: 1.0.0
+appVersion: "v0.11.3"
+kubeVersion: ">=1.26.0-0"
+dependencies:
+  - name: open-webui
+    version: "16.5.0"
+    repository: https://helm.openwebui.com

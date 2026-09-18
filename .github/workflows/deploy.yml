@@ -1,0 +1,47 @@
+name: V1 deployment configuration validation
+on:
+  pull_request:
+    paths: ['helm-chart/**', 'scripts/**', '.github/workflows/deploy.yml']
+  push:
+    branches: [main]
+    paths: ['helm-chart/**', 'scripts/**', '.github/workflows/deploy.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v1-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pinned Helm CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSLO https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz
+          curl -fsSLO https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz.sha256sum
+          sha256sum -c helm-v3.19.0-linux-amd64.tar.gz.sha256sum
+          tar -xzf helm-v3.19.0-linux-amd64.tar.gz
+          sudo install linux-amd64/helm /usr/local/bin/helm
+      - name: Install validation dependencies
+        run: |
+          python3 -m venv _local/venv
+          _local/venv/bin/pip install -r scripts/requirements-validation.txt
+      - name: Lint, render, validate and test guards
+        run: |
+          export PATH="$PWD/_local/venv/bin:$PATH"
+          bash scripts/validate.sh
+          git diff --exit-code -- helm-chart/Chart.lock
+      - name: Deployment status
+        run: |
+          echo "Automated deployment NOT VERIFIED and NOT ENABLED."
+          echo "No kubeconfig, cluster credentials, image build or publish used."
+          echo "Deploy manually inside the inspected KodeKloud playground."
+# No deploy job: runner-to-cluster connectivity and a scoped credential method
+# must be verified and approved before one is introduced.

@@ -1,0 +1,99 @@
+Historical validation before repository cleanup. Original README preservation and upstream-workflow guard were superseded by requested cleanup; see cleanup-validation.txt.
+
+Static verification only — no cluster/API/model/browser calls.
+UTC: 2026-09-18T03:14:11.586701+00:00
+
+> Helm version
+v3.19.0+g3d8990f
+exit_code=0
+
+> Project Helm repository
+"thinkwithops-openwebui" has been added to your repositories
+exit_code=0
+
+> Locked dependency build
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "thinkwithops-openwebui" chart repository
+Update Complete. ⎈Happy Helming!⎈
+Saving 1 charts
+Downloading open-webui from repo https://helm.openwebui.com
+Deleting outdated charts
+exit_code=0
+
+> Helm lint playground
+==> Linting helm-chart
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+exit_code=0
+
+PASS: Helm template playground
+
+> Configuration validation playground
+PASS: 10 objects; 3 workloads; pins, probes, resources, secret refs, auth, persistence
+exit_code=0
+
+> Helm lint ingress
+==> Linting helm-chart
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+exit_code=0
+
+PASS: Helm template ingress
+
+> Configuration validation ingress
+PASS: 11 objects; 3 workloads; pins, probes, resources, secret refs, auth, persistence
+exit_code=0
+
+> Bash syntax lib-playground
+
+exit_code=0
+
+> Bash syntax preflight
+
+exit_code=0
+
+> Bash syntax deploy
+
+exit_code=0
+
+> Bash syntax verify
+
+exit_code=0
+
+> Bash syntax export-artifacts
+
+exit_code=0
+
+> Bash syntax validate
+
+exit_code=0
+
+> Bash syntax backup
+
+exit_code=0
+
+> Bash syntax restore
+
+exit_code=0
+
+PASS: Python AST syntax (4 operational scripts)
+PASS: workflow/YAML parsing; CI has no deploy job
+
+> Configuration and export guard tests
+........
+----------------------------------------------------------------------
+Ran 8 tests in 9.389s
+
+OK
+exit_code=0
+
+> Git whitespace diff
+
+exit_code=0
+
+PASS: upstream application source and dependencies unchanged
+PASS: original README preserved verbatim (line endings normalized)
+
+NOT RUN: live cluster deployment, server admission, provider chat, browser/TLS/WebSocket checks, restart persistence, backup/restore drill, GitHub Actions execution.

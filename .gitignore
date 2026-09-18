@@ -311,3 +311,14 @@ cypress/videos
 cypress/screenshots
 .vscode/settings.json
 .cptr
+
+# Playground credentials, private evidence, backups and local tooling
+/_local/
+/helm-chart/charts/
+**/secrets.env
+**/values-session.yaml
+**/kubeconfig*
+*.dump
+*.tar.gz
+*.age
+.claude/settings.local.json

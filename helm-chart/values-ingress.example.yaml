@@ -1,0 +1,15 @@
+# Copy into _local; use ONLY after verifying controller, DNS and certificate.
+# No ingress controller or certificate issuer is installed by this project.
+open-webui:
+  service: {type: ClusterIP, nodePort: ""}
+  ingress:
+    enabled: true
+    class: REPLACE_WITH_EXISTING_CLASS
+    host: chat.example.invalid
+    tls: true
+    existingSecret: openwebui-tls
+    annotations: {}
+    # Add controller-specific WebSocket/time-out annotations only after inspection.
+appConfig:
+  WEBUI_URL: https://chat.example.invalid
+  WEBUI_SESSION_COOKIE_SECURE: "True"

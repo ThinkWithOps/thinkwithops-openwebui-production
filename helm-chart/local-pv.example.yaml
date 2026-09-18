@@ -1,0 +1,47 @@
+# NOT included in the Helm release. Follow docs/storage.md before applying.
+# Replace REPLACE_WORKER with the chosen node's kubernetes.io/hostname label.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: thinkwithops-local
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: thinkwithops-openwebui-data
+spec:
+  capacity: {storage: 5Gi}
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: thinkwithops-local
+  claimRef: {namespace: thinkwithops-openwebui, name: openwebui}
+  local: {path: /var/local/thinkwithops-openwebui/app}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values: [REPLACE_WORKER]
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: thinkwithops-openwebui-postgresql
+spec:
+  capacity: {storage: 5Gi}
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: thinkwithops-local
+  claimRef: {namespace: thinkwithops-openwebui, name: openwebui-postgresql}
+  local: {path: /var/local/thinkwithops-openwebui/postgresql}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values: [REPLACE_WORKER]
