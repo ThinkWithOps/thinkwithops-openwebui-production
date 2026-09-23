@@ -1,4 +1,4 @@
-# Open WebUI — Kubernetes Deployment
+﻿# Open WebUI â€” Kubernetes Deployment
 
 > A Kubernetes DevOps layer (Helm, PostgreSQL, Redis, GitHub Actions CI validation) built on top of Open WebUI, a self-hosted LLM chat interface.
 
@@ -19,7 +19,7 @@
 - [Project Description](#project-description)
 - [Video Series](#video-series)
 - [Attribution](#attribution)
-- [V1 — Kubernetes Deployment](#v1--kubernetes-deployment)
+- [V1 â€” Kubernetes Deployment](#v1--kubernetes-deployment)
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
@@ -35,7 +35,7 @@
 
 ## Project Description
 
-This repo takes [Open WebUI](https://github.com/open-webui/open-webui) — a full-featured, self-hosted web interface for LLMs (Python/FastAPI backend, Svelte frontend, supports Ollama and any OpenAI-compatible API) — and adds a Kubernetes deployment layer around it, without touching a single line of application code.
+This repo takes [Open WebUI](https://github.com/open-webui/open-webui) â€” a full-featured, self-hosted web interface for LLMs (Python/FastAPI backend, Svelte frontend, supports Ollama and any OpenAI-compatible API) â€” and adds a Kubernetes deployment layer around it, without touching a single line of application code.
 
 The project runs on an existing **Kubernetes multi-node** playground. A pinned official Helm chart deploys Open WebUI; PostgreSQL stores users and chat history, Redis supports WebSocket communication, and persistent volumes hold database files and uploads.
 
@@ -45,7 +45,7 @@ Everything under `helm-chart/`, `scripts/`, `docs/`, and `.github/workflows/depl
 
 | Part | Tag | Focus | Status |
 |---|---|---|---|
-| V1 | `v1.0-openwebui-k8s-deployment` *(proposed)* | Kubernetes deployment, model connection, chat and persistence verification | Fully verified live; tag remains pending approval |
+| V1 | `v1.0-openwebui-k8s-deployment` | Kubernetes deployment, model connection, chat and persistence verification | Fully verified live; tag created and pushed |
 
 ## Attribution
 
@@ -55,7 +55,7 @@ The application deployment uses the [official Open WebUI Helm chart](https://git
 
 ---
 
-## V1 — Kubernetes Deployment
+## V1 â€” Kubernetes Deployment
 
 V1 includes:
 
@@ -68,7 +68,7 @@ V1 includes:
 - Preflight, deployment, chat verification, evidence export, and encrypted backup/restore scripts.
 - GitHub Actions for Helm linting, rendering, and configuration checks.
 
-**Current status:** fully verified live in the playground — deployment, Groq-backed chat, browser access, streaming/WebSocket behavior, uploads, restart persistence, encrypted backup, and fresh-session restore confirmed during the live run.
+**Current status:** fully verified live in the playground â€” deployment, Groq-backed chat, browser access, streaming/WebSocket behavior, uploads, restart persistence, encrypted backup, and fresh-session restore confirmed during the live run.
 
 ## Architecture
 
@@ -81,8 +81,8 @@ flowchart TB
     Model["External model API"]:::entry
     PG["PostgreSQL"]:::service
     Redis["Redis<br/>WebSocket coordination"]:::service
-    AppPVC[("Application PVC<br/>uploads / local data · 5Gi")]:::data
-    DBPVC[("PostgreSQL PVC<br/>users / chat history · 5Gi")]:::data
+    AppPVC[("Application PVC<br/>uploads / local data Â· 5Gi")]:::data
+    DBPVC[("PostgreSQL PVC<br/>users / chat history Â· 5Gi")]:::data
 
     Browser --> Access --> Service --> UI
     UI --> Model
@@ -118,7 +118,7 @@ flowchart TB
 
 ## Prerequisites
 
-> V1 was built and verified against a **time-limited Kubernetes lab environment**, so examples below use its terminology (View Port, session expiry). The scripts and Helm chart target any Kubernetes cluster — pick the path below matching where you're running this.
+> V1 was built and verified against a **time-limited Kubernetes lab environment**, so examples below use its terminology (View Port, session expiry). The scripts and Helm chart target any Kubernetes cluster â€” pick the path below matching where you're running this.
 
 Common to every path:
 - Helm, Bash, Git, curl, Python 3.10+, and Python venv support.
@@ -127,19 +127,19 @@ Common to every path:
 - `kubectl` pointed at the target cluster (`kubectl config current-context`).
 
 **Local (minikube / kind / Docker Desktop Kubernetes):**
-- Cluster running with a default StorageClass already present (minikube/kind ship one — confirm with `kubectl get storageclass`).
-- Browser access via `kubectl port-forward` or `minikube service` — no View Port/ingress needed.
+- Cluster running with a default StorageClass already present (minikube/kind ship one â€” confirm with `kubectl get storageclass`).
+- Browser access via `kubectl port-forward` or `minikube service` â€” no View Port/ingress needed.
 - No session expiry; skip `SESSION_EXPIRES_AT`.
 
 **Cloud (EKS / GKE / AKS, your own account):**
 - Cluster provisioned and `kubectl` context pointed at it; a cloud StorageClass exists by default (e.g. `gp2`/`gp3` on EKS).
-- Browser access via a `LoadBalancer` Service or an ingress controller + your own domain/TLS — not View Port.
-- No session expiry; skip `SESSION_EXPIRES_AT`. Real cloud cost applies — size resources accordingly.
+- Browser access via a `LoadBalancer` Service or an ingress controller + your own domain/TLS â€” not View Port.
+- No session expiry; skip `SESSION_EXPIRES_AT`. Real cloud cost applies â€” size resources accordingly.
 
 **Time-limited lab playground (what V1 was verified against):**
 - A working StorageClass or the [local-PV setup](docs/storage.md) if none exists.
-- Access via the lab's View Port / NodePort exposure — see [Browser Access](#browser-access).
-- The active session's expiry time and HTTPS browser access URL — note both before deploying.
+- Access via the lab's View Port / NodePort exposure â€” see [Browser Access](#browser-access).
+- The active session's expiry time and HTTPS browser access URL â€” note both before deploying.
 
 ## How to Deploy
 
@@ -158,7 +158,7 @@ kubectl config current-context
 kubectl get storageclass
 ```
 
-### Path A — Local (minikube / kind / Docker Desktop)
+### Path A â€” Local (minikube / kind / Docker Desktop)
 
 ```bash
 export EXPECTED_CONTEXT='REPLACE_WITH_YOUR_LOCAL_CONTEXT'
@@ -180,7 +180,7 @@ kubectl port-forward -n <namespace> svc/<open-webui-service> 8080:80
 # open http://localhost:8080
 ```
 
-### Path B — Cloud (EKS / GKE / AKS, your own account)
+### Path B â€” Cloud (EKS / GKE / AKS, your own account)
 
 ```bash
 export EXPECTED_CONTEXT='REPLACE_WITH_YOUR_CLOUD_CONTEXT'
@@ -202,7 +202,7 @@ kubectl get svc -n <namespace>
 # Ingress: use your own domain + TLS, see docs/deployment.md#existing-ingress--tls
 ```
 
-### Path C — Time-limited lab playground (what V1 was verified against)
+### Path C â€” Time-limited lab playground (what V1 was verified against)
 
 ```bash
 # Replace with the inspected session details.
@@ -222,7 +222,7 @@ export PREFLIGHT_REVIEWED=yes
 bash scripts/deploy.sh
 ```
 
-Browser access: **Playground View Port → 30080**. Set `WEBUI_URL` to the exact HTTPS URL generated by the active session. If View Port runs on a separate entry node, use the [forwarding instructions](docs/deployment.md).
+Browser access: **Playground View Port â†’ 30080**. Set `WEBUI_URL` to the exact HTTPS URL generated by the active session. If View Port runs on a separate entry node, use the [forwarding instructions](docs/deployment.md).
 
 ---
 
@@ -233,8 +233,8 @@ See the [deployment guide](docs/deployment.md) for Helm installation, credential
 ## Browser Access
 
 - **Local:** `kubectl port-forward`, then open `http://localhost:<port>`.
-- **Cloud:** `LoadBalancer` Service EXTERNAL-IP, or your own ingress + domain + TLS — see the [TLS ingress profile](docs/deployment.md#existing-ingress--tls).
-- **Lab playground:** View Port → 30080, HTTPS URL generated per session — see the [forwarding instructions](docs/deployment.md) if View Port runs on a separate entry node.
+- **Cloud:** `LoadBalancer` Service EXTERNAL-IP, or your own ingress + domain + TLS â€” see the [TLS ingress profile](docs/deployment.md#existing-ingress--tls).
+- **Lab playground:** View Port â†’ 30080, HTTPS URL generated per session â€” see the [forwarding instructions](docs/deployment.md) if View Port runs on a separate entry node.
 
 ## Project Structure
 
@@ -269,11 +269,11 @@ The scripts check database/Redis connectivity, sign-in, a real model response, s
 |---|---|
 | Helm lint/render, both access profiles | Passed |
 | Configuration guards, syntax, 8 guard tests | Passed |
-| Playground deployment and backend readiness | Passed — live run |
-| Real model chat | Passed — Groq `openai/gpt-oss-20b` |
-| Browser HTTPS, streaming, WebSockets and upload | Passed — live run |
+| Playground deployment and backend readiness | Passed â€” live run |
+| Real model chat | Passed â€” Groq `openai/gpt-oss-20b` |
+| Browser HTTPS, streaming, WebSockets and upload | Passed â€” live run |
 | App-only restart persistence | Passed |
-| Encrypted backup and fresh-session restore | Passed — live run |
+| Encrypted backup and fresh-session restore | Passed â€” live run |
 | Automated deployment from GitHub Actions | Not enabled; connectivity and credentials unverified |
 
 See [V1 evidence](docs/evidence/v1/README.md) and [actual static output](docs/evidence/v1/static-validation.txt).
@@ -393,3 +393,4 @@ bash scripts/restore.sh
 - Database/Redis connections are authenticated but unencrypted within the lab network.
 - Image versions use exact tags rather than immutable digests.
 - CI validates configuration; deployment runs manually inside the playground.
+
